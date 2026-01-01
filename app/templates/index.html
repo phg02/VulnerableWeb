@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VulnerableWeb</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg" href="{{ url_for('static', filename='image/logo.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+  <nav aria-label="Main navigation">
+    <div class="nav-container">
+      <a class="brand" href="/" aria-label="VulnerableWeb Home">
+        <img src="{{ url_for('static', filename='image/logo.svg') }}" height="40" width="40" alt="VulnerableWeb Logo">
+        <h4>VulnerableWeb</h4>
+      </a>
+      <div class="nav-links">
+        {% if session.get('username') %}
+          <span class="welcome">Welcome {{ session.get('username') }}</span>
+          <a class="link" href="/logout">Logout</a>
+        {% else %}
+          <a class="link" href="/signin">Sign In</a>
+          <a class="link" href="/signup">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <div class="divider" aria-label="Home section">
+    <div class="left">
+      <div class="hero">
+        <img src="{{ url_for('static', filename='image/paw2.png') }}" alt="paw">
+        <div class="word">
+          <h1>Welcome!</h1>
+          <h4>Explore the app</h4>
+        </div>
+      </div>
+      <div class="cat-stretch">
+        <img src="{{ url_for('static', filename='image/catSignUp.png') }}" width="500" alt="cute cat">
+      </div>
+    </div>
+    <div class="right">
+      <div class="formbox" aria-label="Home info">
+        <div class="form-heading">
+          <h2>VulnerableWeb</h2>
+        </div>
+        {% if session.get('username') %}
+          <div class="info-box">
+            <p class="success"><strong>Logged in as: {{ session.get('username') }}</strong></p>
+            <p>Welcome back! You can now navigate the app.</p>
+            <div class="button-group">
+              <a href="/logout" class="custom-btn">Logout</a>
+            </div>
+          </div>
+        {% else %}
+          <div class="info-box">
+            <p>This is an intentionally vulnerable web app used for learning.</p>
+            <p class="muted">It matches the look and feel of the sign-in and sign-up pages.</p>
+            <div class="button-group">
+              <a href="/signin" class="custom-btn">Sign In</a>
+              <a href="/signup" class="custom-btn">Register</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
