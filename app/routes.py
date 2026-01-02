@@ -5,6 +5,9 @@ import os
 main_bp = Blueprint('main', __name__)
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
+# Get the absolute path to the project root directory
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 # Basic routes to render templates
 
 @main_bp.route('/')
@@ -155,8 +158,8 @@ def notes():
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
 	
-	# Use single predefined file
-	filename = "shared_notes.txt"
+	# Use single predefined file with absolute path
+	filename = os.path.join(BASE_DIR, "shared_notes.txt")
 	output = ""
 	error = ""
 	
@@ -175,8 +178,8 @@ def search_notes():
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
 	
-	# Use single predefined file
-	filename = "shared_notes.txt"
+	# Use single predefined file with absolute path
+	filename = os.path.join(BASE_DIR, "shared_notes.txt")
 	search_term = request.form.get('search_term', '').strip()
 	output = ""
 	error = ""
