@@ -23,6 +23,8 @@
       <div class="nav-links">
         {% if session.get('username') %}
           <span class="welcome">Welcome {{ session.get('username') }}</span>
+          <a class="link" href="/todos">Todos</a>
+          <a class="link" href="/notes">Notes</a>
           <a class="link" href="/logout">Logout</a>
         {% else %}
           <a class="link" href="/signin">Sign In</a>
@@ -55,6 +57,7 @@
             <p class="success"><strong>Logged in as: {{ session.get('username') }}</strong></p>
             <p>Welcome back! You can now navigate the app.</p>
             <div class="button-group">
+              <a href="/todos" class="custom-btn">View Todos</a>
               <a href="/logout" class="custom-btn">Logout</a>
             </div>
           </div>

@@ -24,6 +24,15 @@
     background-color: var(--primary-hover-btn-color);
 }
 
+.secondary-btn{
+    background-color: #6c757d;
+    color: white;
+}
+
+.secondary-btn:hover{
+    background-color: #5a6268;
+}
+
 .adopt-btn{
     background-color: var(--adopt-btn-color);
     padding: 0.5rem 3rem;

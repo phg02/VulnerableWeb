@@ -1,5 +1,37 @@
-@import 'shared/variables.css';
-h1, h2, h3, h4, h5, h6{
+@import 'variables.css';
+
+/* Font families */
+body, input, textarea, button, select {
+    font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
     font-family: 'Kreon', sans-serif;
     color: var(--primary-text-color);
+}
+
+/* Navigation fonts */
+nav, .nav-container, .nav-links {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+}
+
+.brand h4 {
+    font-family: 'Kreon', sans-serif;
+    font-weight: 600;
+}
+
+.nav-links .link, .nav-links .welcome {
+    font-weight: 500;
+}
+
+/* Form labels */
+.custom-label, label {
+    font-family: 'Inter', sans-serif;
+    color: var(--primary-text-color);
+}
+
+/* Button fonts */
+.custom-btn, .adopt-btn, button {
+    font-family: 'Inter', sans-serif;
 }

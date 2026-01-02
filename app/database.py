@@ -23,8 +23,7 @@ def close_db(e=None):
 def init_db():
     """Initialize the database with schema"""
     db = get_db()
-    # Recreate users table with required columns (plaintext password for this lab)
-    db.execute("DROP TABLE IF EXISTS users")
+    # Create users table with required columns (plaintext password for this lab)
     db.execute(
         """
         CREATE TABLE IF NOT EXISTS users (
@@ -32,6 +31,19 @@ def init_db():
             username TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    
+    # Create todos table (shared among all users)
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            due_date TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """

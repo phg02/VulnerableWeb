@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List - VulnerableWeb</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg" href="{{ url_for('static', filename='image/logo.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/todos.css') }}">
+</head>
+<body>
+  <nav aria-label="Main navigation">
+    <div class="nav-container">
+      <a class="brand" href="/" aria-label="VulnerableWeb Home">
+        <img src="{{ url_for('static', filename='image/logo.svg') }}" height="40" width="40" alt="VulnerableWeb Logo">
+        <h4>VulnerableWeb</h4>
+      </a>
+      <div class="nav-links">
+        <span class="welcome">Welcome {{ session.get('username') }}</span>
+        <a class="link" href="/todos">Todos</a>
+        <a class="link" href="/notes">Notes</a>
+        <a class="link" href="/logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header">
+      <h1>Shared Todo List</h1>
+      <p class="subtitle">All users can view and manage these todos</p>
+    </div>
+
+    <!-- Add Todo Form -->
+    <div class="add-todo-section">
+      <h3>Add New Todo</h3>
+      <form method="POST" action="/todos/add" class="todo-form">
+        <div class="form-row">
+          <input type="text" name="title" placeholder="Todo title" required class="form-input">
+          <input type="date" name="due_date" class="form-input">
+        </div>
+        <textarea name="description" placeholder="Description (optional)" class="form-textarea"></textarea>
+        <button type="submit" class="custom-btn">Add Todo</button>
+      </form>
+    </div>
+
+    <!-- Search Form -->
+    <div class="search-section">
+      <form method="GET" action="/todos/search" class="search-form">
+        <input type="text" name="q" placeholder="Search todos..." value="{{ search or '' }}" class="search-input">
+        <button type="submit" class="custom-btn">Search</button>
+        <a href="/todos" class="custom-btn">Clear</a>
+      </form>
+    </div>
+
+    <!-- Todo List -->
+    <div class="todos-section">
+      <h3>All Todos ({{ todos|length }})</h3>
+      {% if todos %}
+        <div class="todos-grid">
+          {% for todo in todos %}
+            <div class="todo-card">
+              <div class="todo-header">
+                <h4>{{ todo.title|safe }}</h4>
+                <a href="/todos/delete/{{ todo.id }}" class="delete-btn" onclick="return confirm('Delete this todo?')">×</a>
+              </div>
+              {% if todo.description %}
+                <p class="todo-description">{{ todo.description|safe }}</p>
+              {% endif %}
+              {% if todo.due_date %}
+                <p class="todo-due-date">Due: {{ todo.due_date }}</p>
+              {% endif %}
+              <p class="todo-created">Created: {{ todo.created_at }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="no-todos">No todos found. Add one above!</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

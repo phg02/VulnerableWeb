@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes Viewer - VulnerableWeb</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg" href="{{ url_for('static', filename='image/logo.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/notes.css') }}">
+</head>
+<body>
+  <nav aria-label="Main navigation">
+    <div class="nav-container">
+      <a class="brand" href="/" aria-label="VulnerableWeb Home">
+        <img src="{{ url_for('static', filename='image/logo.svg') }}" height="40" width="40" alt="VulnerableWeb Logo">
+        <h4>VulnerableWeb</h4>
+      </a>
+      <div class="nav-links">
+        <span class="welcome">Welcome {{ session.get('username') }}</span>
+        <a class="link" href="/todos">Todos</a>
+        <a class="link" href="/notes">Notes</a>
+        <a class="link" href="/logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="header">
+      <h1>Notes Viewer</h1>
+      <p class="subtitle">View and search shared notes</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="form-section">
+      <h3>Search in Notes</h3>
+      <form method="POST" action="/notes/search" class="notes-form">
+        <div class="form-row">
+          <input type="text" name="search_term" placeholder="Search term" 
+                 value="{{ search_term or '' }}" class="form-input">
+          <button type="submit" class="custom-btn">Search</button>
+          <a href="/notes/clear" class="custom-btn secondary-btn">Clear Search</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- File Contents Section -->
+    <div class="output-section">
+      <h3>{% if is_search %}Search Results{% else %}Shared Notes{% endif %}</h3>
+      <p class="file-info"><strong>File:</strong> {{ filename }}</p>
+      {% if search_term and is_search %}
+        <p class="file-info"><strong>Search Term:</strong> {{ search_term }}</p>
+      {% endif %}
+      
+      {% if output %}
+        <div class="notes-list">
+          {% for line in output.strip().split('\n') %}
+            {% if line.strip() %}
+              <div class="note-item">
+                <span class="note-number">{{ loop.index }}.</span>
+                <span class="note-content">{{ line.strip() }}</span>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+      
+      {% if error %}
+        <div class="error-box">
+          <h4>Error:</h4>
+          <pre>{{ error }}</pre>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions-section">
+      <h3>About Notes</h3>
+      <p>This page displays content from the shared notes file: <strong>shared_notes.txt</strong></p>
+      <p>Use the search form above to find specific content within the notes.</p>
+    </div>
+  </div>
+</body>
+</html>
