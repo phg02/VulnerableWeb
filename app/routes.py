@@ -5,10 +5,8 @@ import os
 main_bp = Blueprint('main', __name__)
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
-# Get the absolute path to the project root directory
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-# Basic routes to render templates
 
 @main_bp.route('/')
 def index():
@@ -20,13 +18,11 @@ def signin_page():
 
 @main_bp.route('/signin', methods=['POST'])
 def signin():
-	"""Vulnerable login endpoint - intentionally uses string concatenation SQL for boolean-based SQL injection."""
 	username = request.form.get('username', '')
 	password = request.form.get('password', '')
 	
 	db = get_db()
 	
-	# INTENTIONALLY VULNERABLE: String concatenation allows SQL injection
 	query = (
 		"SELECT * FROM users "
 		"WHERE username = '" + username + "' "
@@ -44,7 +40,6 @@ def signin():
 		resp.set_cookie('refresh_token', 'example-refresh-token')
 		return resp
 	
-	# Return to signin page with error
 	return render_template('signin.html', error='Invalid username or password')
 
 @main_bp.route('/signup', methods=['GET'])
@@ -53,7 +48,6 @@ def signup_page():
 
 @main_bp.route('/signup', methods=['POST'])
 def signup():
-	"""Register new user - stores plaintext password."""
 	username = request.form.get('username', '')
 	email = request.form.get('email', '')
 	password = request.form.get('password', '')
@@ -73,7 +67,6 @@ def signup():
 	if error is None:
 		db = get_db()
 		try:
-			# Insert user with plaintext password (intentionally insecure)
 			db.execute(
 				'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
 				(username, email, password)
@@ -87,7 +80,6 @@ def signup():
 
 @main_bp.route('/logout')
 def logout():
-	"""Clear session and logout user."""
 	session.clear()
 	resp = make_response(redirect(url_for('main.index')))
 	resp.set_cookie('user_id', '', expires=0)
@@ -154,17 +146,14 @@ def search_todos():
 
 @main_bp.route('/notes')
 def notes():
-	"""View notes page - Shows content from single predefined file."""
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
 	
-	# Use single predefined file with absolute path
 	filename = os.path.join(BASE_DIR, "shared_notes.txt")
 	output = ""
 	error = ""
 	
 	try:
-		# INTENTIONALLY VULNERABLE: Command injection via os.popen
 		with os.popen("cat " + filename) as f:
 			output = f.read()
 	except Exception as e:
@@ -174,11 +163,9 @@ def notes():
 
 @main_bp.route('/notes/search', methods=['POST'])
 def search_notes():
-	"""Search in predefined file using grep - VULNERABLE to command injection."""
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
 	
-	# Use single predefined file with absolute path
 	filename = os.path.join(BASE_DIR, "shared_notes.txt")
 	search_term = request.form.get('search_term', '').strip()
 	output = ""
