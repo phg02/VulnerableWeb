@@ -53,7 +53,7 @@
       <h3>{% if is_search %}Search Results{% else %}Shared Notes{% endif %}</h3>
       <p class="file-info"><strong>File:</strong> {{ filename }}</p>
       {% if search_term and is_search %}
-        <p class="file-info"><strong>Search Term:</strong> {{ search_term }}</p>
+        <p class="file-info"><strong>Search Term:</strong> {{ search_term|safe}}</p>
       {% endif %}
       
       {% if output %}
