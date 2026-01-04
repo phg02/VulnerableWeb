@@ -133,7 +133,7 @@ def search_todos():
 	db = get_db()
 	
 	if search:
-		query = "SELECT * FROM todos WHERE title LIKE " + search + " OR description LIKE " + search
+		query = "SELECT * FROM todos WHERE title LIKE '" + search + "' OR description LIKE '" + search +"'"
 		print(f"DEBUG - Search query: {query}")
 		todos = db.execute(query).fetchall()
 		print(f"DEBUG - Query results: {len(todos)} rows returned")
