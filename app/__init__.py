@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from config import config
 import os
 
@@ -9,6 +10,9 @@ def create_app(config_name=None):
     
     app = Flask(__name__)
     app.config.from_object(config.get(config_name, config['default']))
+    
+    # Enable CORS for all origins
+    CORS(app, resources={r"/*": {"origins": "*"}})
     
     # Register database functions
     from app.database import close_db, init_db
