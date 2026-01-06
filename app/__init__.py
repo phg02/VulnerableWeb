@@ -13,7 +13,6 @@ def create_app(config_name=None):
     app.config['SESSION_COOKIE_HTTPONLY'] = False
     app.config['SESSION_COOKIE_SECURE'] = False
     app.config['SESSION_COOKIE_SAMESITE'] = None
-    app.config['SESSION_TYPE'] = 'filesystem'
     app.config['PERMANENT_SESSION_LIFETIME'] = 3600
     
     # Enable CORS for all origins
