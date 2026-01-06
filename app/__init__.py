@@ -10,9 +10,14 @@ def create_app(config_name=None):
     
     app = Flask(__name__)
     app.config.from_object(config.get(config_name, config['default']))
+    app.config['SESSION_COOKIE_HTTPONLY'] = False
+    app.config['SESSION_COOKIE_SECURE'] = False
+    app.config['SESSION_COOKIE_SAMESITE'] = None
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['PERMANENT_SESSION_LIFETIME'] = 3600
     
     # Enable CORS for all origins
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     
     # Register database functions
     from app.database import close_db, init_db

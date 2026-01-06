@@ -34,6 +34,7 @@ def signin():
 		session.clear()
 		session['user_id'] = user['id']
 		session['username'] = user['username']
+		session.permanent = True
 		resp = make_response(redirect(url_for('main.index')))
 		resp.set_cookie('user_id', str(user['id']))
 		resp.set_cookie('access_token', 'example-access-token')
