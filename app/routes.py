@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from werkzeug.utils import secure_filename
 from app.database import get_db
 import os
+import requests
 
 main_bp = Blueprint('main', __name__)
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -289,3 +290,27 @@ def get_uploaded_files():
 	if not os.path.exists(upload_folder):
 		return []
 	return os.listdir(upload_folder)
+
+@main_bp.route('/ssrf', methods=['GET', 'POST'])
+def follow_url():
+	if not session.get('user_id'):
+		return redirect(url_for('main.signin_page'))
+	
+	url = request.args.get('url', '')
+	content = ''
+	error = ''
+	
+	if request.method == 'POST':
+		url = request.form.get('url', '')
+	
+	if url:
+		try:
+			response = requests.get(url, timeout=5)
+			content = response.text
+		except Exception as e:
+			error = f'Error fetching URL: {str(e)}'
+	else:
+		if request.method == 'POST' or request.method == 'GET' and 'url' in request.args:
+			error = 'No URL parameter provided'
+	
+	return render_template('ssrf.html', url=url, content=content, error=error)
