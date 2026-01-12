@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, make_response, send_file
+from flask import Blueprint, render_template, request, session, redirect, url_for, make_response, send_file, current_app
+from werkzeug.utils import secure_filename
 from app.database import get_db
 import os
 
@@ -235,3 +236,56 @@ def delete_user(user_id):
 @main_bp.route('/file/<path:filename>')
 def unsafe_static(filename):
 	return send_file(filename)
+
+@main_bp.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+	if not session.get('user_id'):
+		return redirect(url_for('main.signin_page'))
+	
+	if request.method == 'POST':
+		# Check if file is in request
+		if 'file' not in request.files:
+			return render_template('files.html', error='No file selected', uploaded_files=get_uploaded_files())
+		
+		f = request.files['file']
+		
+		if f.filename == '':
+			return render_template('files.html', error='No file selected', uploaded_files=get_uploaded_files())
+		
+		if f:
+			filename = secure_filename(f.filename)
+			f.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+			return render_template('files.html', success='File uploaded successfully', uploaded_files=get_uploaded_files())
+	
+	return render_template('files.html', uploaded_files=get_uploaded_files())
+
+@main_bp.route('/files', methods=['GET'])
+def read_file():
+	if not session.get('user_id'):
+		return redirect(url_for('main.signin_page'))
+	
+	file = request.args.get('file')
+	
+	if not file:
+		return redirect(url_for('main.upload_file'))
+	
+	try:
+		# If file doesn't start with /, try uploads folder first
+		if not file.startswith('/'):
+			filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], file)
+		else:
+			filepath = file
+		
+		f = open(filepath, 'r')
+		content = f.read()
+		f.close()
+		return render_template('view_file.html', filename=file, content=content)
+	except Exception as e:
+		return render_template('files.html', error=f'Error reading file: {str(e)}', uploaded_files=get_uploaded_files())
+
+def get_uploaded_files():
+	"""Get list of uploaded files"""
+	upload_folder = current_app.config['UPLOAD_FOLDER']
+	if not os.path.exists(upload_folder):
+		return []
+	return os.listdir(upload_folder)

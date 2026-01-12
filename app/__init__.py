@@ -15,6 +15,11 @@ def create_app(config_name=None):
     app.config['SESSION_COOKIE_SAMESITE'] = None
     app.config['PERMANENT_SESSION_LIFETIME'] = 3600
     
+    # Configure upload folder
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'uploads')
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    
     # Enable CORS for all origins
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     
