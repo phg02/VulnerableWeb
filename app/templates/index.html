@@ -23,8 +23,12 @@
       <div class="nav-links">
         {% if session.get('username') %}
           <span class="welcome">Welcome {{ session.get('username') }}</span>
-          <a class="link" href="/todos">Todos</a>
-          <a class="link" href="/notes">Notes</a>
+          {% if session.get('role') != 'admin' %}
+            <a class="link" href="/todos">Todos</a>
+            <a class="link" href="/notes">Notes</a>
+          {% else %}
+            <a class="link" href="/admin/users">Users</a>
+          {% endif %}
           <a class="link" href="/logout">Logout</a>
         {% else %}
           <a class="link" href="/signin">Sign In</a>
@@ -44,7 +48,7 @@
         </div>
       </div>
       <div class="cat-stretch">
-        <img src="{{ url_for('static', filename='image/catSignUp.png') }}" width="500" alt="cute cat">
+        <img src="/file/static/image/catSignUp.png" width="500" alt="cute cat">
       </div>
     </div>
     <div class="right">

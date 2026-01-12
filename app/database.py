@@ -31,6 +31,7 @@ def init_db():
             username TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
+            role TEXT DEFAULT 'user',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
@@ -50,3 +51,20 @@ def init_db():
     )
     db.commit()
     print("Database initialized successfully")
+
+def seed_admin():
+    """Seed an admin account"""
+    db = get_db()
+    try:
+        # Insert admin account if it doesn't exist
+        db.execute(
+            """
+            INSERT INTO users (username, email, password, role)
+            VALUES (?, ?, ?, ?)
+            """,
+            ('admin', 'admin@example.com', 'admin123', 'admin')
+        )
+        db.commit()
+        print("Admin account created successfully: admin / admin123")
+    except sqlite3.IntegrityError:
+        print("Admin account already exists")

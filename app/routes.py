@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, make_response
+from flask import Blueprint, render_template, request, session, redirect, url_for, make_response, send_file
 from app.database import get_db
 import os
 
@@ -34,8 +34,10 @@ def signin():
 		session.clear()
 		session['user_id'] = user['id']
 		session['username'] = user['username']
+		session['role'] = user['role']
 		session.permanent = True
-		resp = make_response(redirect(url_for('main.index')))
+		resp_redirect = url_for('main.admin_users') if user['role'] == 'admin' else url_for('main.index')
+		resp = make_response(redirect(resp_redirect))
 		resp.set_cookie('user_id', str(user['id']))
 		resp.set_cookie('access_token', 'example-access-token')
 		resp.set_cookie('refresh_token', 'example-refresh-token')
@@ -69,8 +71,8 @@ def signup():
 		db = get_db()
 		try:
 			db.execute(
-				'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-				(username, email, password)
+				'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
+				(username, email, password, 'user')
 			)
 			db.commit()
 			return redirect(url_for('main.signin_page'))
@@ -150,6 +152,9 @@ def notes():
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
 	
+	if session.get('role') == 'admin':
+		return render_template('index.html', error='Notes feature is not available for admin users.')
+	
 	filename = os.path.join(BASE_DIR, "shared_notes.txt")
 	output = ""
 	error = ""
@@ -166,6 +171,9 @@ def notes():
 def search_notes():
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
+	
+	if session.get('role') == 'admin':
+		return render_template('index.html', error='Notes feature is not available for admin users.')
 	
 	filename = os.path.join(BASE_DIR, "shared_notes.txt")
 	search_term = request.form.get('search_term', '').strip()
@@ -193,3 +201,37 @@ def clear_search():
 		return redirect(url_for('main.signin_page'))
 	
 	return redirect(url_for('main.notes'))
+
+@main_bp.route('/admin/users')
+def admin_users():
+	if not session.get('user_id'):
+		return redirect(url_for('main.signin_page'))
+	
+	if session.get('role') != 'admin':
+		return redirect(url_for('main.todos'))
+	
+	db = get_db()
+	users = db.execute('SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC').fetchall()
+	return render_template('admin_users.html', users=users)
+
+@main_bp.route('/admin/users/delete/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+	if not session.get('user_id'):
+		return redirect(url_for('main.signin_page'))
+	
+	if session.get('role') != 'admin':
+		return render_template('index.html', error='Access denied. Admin only.')
+	
+	# Prevent admin from deleting themselves
+	if user_id == session.get('user_id'):
+		return render_template('admin_users.html', error='Cannot delete your own account.')
+	
+	db = get_db()
+	db.execute('DELETE FROM users WHERE id = ?', (user_id,))
+	db.commit()
+	
+	return redirect(url_for('main.admin_users'))
+
+@main_bp.route('/file/<path:filename>')
+def unsafe_static(filename):
+	return send_file(filename)
