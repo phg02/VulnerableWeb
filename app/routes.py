@@ -325,7 +325,3 @@ def follow_url():
 			error = 'No URL parameter provided'
 	
 	return render_template('ssrf.html', url=url, content=content, error=error)
-
-@main_bp.route('/uploads/<path:filename>')
-def serve_upload(filename):
-	return send_file(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
