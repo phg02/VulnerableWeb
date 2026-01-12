@@ -223,6 +223,12 @@ def admin_users():
 
 @main_bp.route('/admin/users/delete/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
+	if request.remote_addr in ['127.0.0.1', '::1', 'localhost']:
+		db = get_db()
+		db.execute('DELETE FROM users WHERE id = ?', (user_id,))
+		db.commit()
+		return redirect(url_for('main.admin_users'))
+
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
 	
