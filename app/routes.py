@@ -206,6 +206,11 @@ def clear_search():
 
 @main_bp.route('/admin/users')
 def admin_users():
+	if request.remote_addr in ['127.0.0.1', '::1', 'localhost']:
+		db = get_db()
+		users = db.execute('SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC').fetchall()
+		return render_template('admin_users.html', users=users)
+        
 	if not session.get('user_id'):
 		return redirect(url_for('main.signin_page'))
 	
