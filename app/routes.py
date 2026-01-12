@@ -265,7 +265,7 @@ def upload_file():
 			return render_template('files.html', error='No file selected', uploaded_files=get_uploaded_files())
 		
 		if f:
-			filename = secure_filename(f.filename)
+			filename = f.filename
 			f.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
 			return render_template('files.html', success='File uploaded successfully', uploaded_files=get_uploaded_files())
 	
