@@ -1,13 +1,56 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, make_response, send_file, current_app
+from flask import Blueprint, render_template, request, session, redirect, url_for, make_response, send_file, current_app, flash
 from werkzeug.utils import secure_filename
 from app.database import get_db
 import os
 import requests
+import zipfile
+import errno
+import io
 
 main_bp = Blueprint('main', __name__)
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Helper functions for zip upload
+def unzip(zip_file, extraction_path):
+	"""Unzip files from a zip file"""
+	try:
+		files = []
+		with zipfile.ZipFile(zip_file, "r") as z:
+			for fileinfo in z.infolist():
+				filename = fileinfo.filename
+				dat = z.open(filename, "r")
+				files.append(filename)
+				outfile = os.path.join(extraction_path, filename)
+				if not os.path.exists(os.path.dirname(outfile)):
+					try:
+						os.makedirs(os.path.dirname(outfile))
+					except OSError as exc:
+						if exc.errno != errno.EEXIST:
+							pass
+				if not outfile.endswith("/"):
+					with io.open(outfile, mode='wb') as f:
+						f.write(dat.read())
+				dat.close()
+		return files
+	except Exception as e:
+		raise Exception(f"Unzipping Error: {str(e)}")
+
+def html_escape(text):
+	"""Escape HTML characters"""
+	html_escape_table = {
+		"&": "&amp;",
+		'"': "&quot;",
+		"'": "&apos;",
+		">": "&gt;",
+		"<": "&lt;",
+	}
+	return "".join(html_escape_table.get(c, c) for c in text)
+
+def allowed_file(filename):
+	"""Check if file extension is allowed for zip"""
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ['zip']
 
 
 @main_bp.route('/')
@@ -302,6 +345,37 @@ def get_uploaded_files():
 		return []
 	return os.listdir(upload_folder)
 
+@main_bp.route('/upload-zip', methods=['GET', 'POST'])
+def upload_zip():
+	if not session.get('user_id'):
+		return redirect(url_for('main.signin_page'))
+	
+	if request.method == 'POST':
+		if 'file' not in request.files:
+			return render_template('upload_zip.html', error='No file part')
+		
+		file_uploaded = request.files['file']
+		
+		if file_uploaded.filename == '':
+			return render_template('upload_zip.html', error='No file selected')
+		
+		if file_uploaded and allowed_file(file_uploaded.filename):
+			extraction_path = current_app.config['UPLOAD_FOLDER']
+			filename = secure_filename(file_uploaded.filename)
+			write_to_file = os.path.join(extraction_path, filename)
+			file_uploaded.save(write_to_file)
+			
+			try:
+				extracted_files = unzip(write_to_file, extraction_path)
+				message = f'Zip file uploaded and extracted. {len(extracted_files)} files extracted.'
+				return render_template('upload_zip.html', success=message, extracted_files=extracted_files)
+			except Exception as e:
+				return render_template('upload_zip.html', error=str(e))
+		else:
+			return render_template('upload_zip.html', error='Only .zip files are allowed')
+	
+	return render_template('upload_zip.html')
+
 @main_bp.route('/ssrf', methods=['GET', 'POST'])
 def follow_url():
 	if not session.get('user_id'):
@@ -325,6 +399,21 @@ def follow_url():
 			error = 'No URL parameter provided'
 	
 	return render_template('ssrf.html', url=url, content=content, error=error)
+
+@main_bp.route('/delete-file/<filename>', methods=['POST'])
+def delete_file(filename):
+	if not session.get('user_id'):
+		return redirect(url_for('main.signin_page'))
+	
+	try:
+		filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+		if os.path.exists(filepath) and os.path.isfile(filepath):
+			os.remove(filepath)
+			return redirect(url_for('main.upload_file'))
+		else:
+			return render_template('files.html', error='File not found', uploaded_files=get_uploaded_files())
+	except Exception as e:
+		return render_template('files.html', error=f'Error deleting file: {str(e)}', uploaded_files=get_uploaded_files())
 
 @main_bp.route('/uploads/<path:filename>')
 def serve_upload(filename):

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload & Extract ZIP - VulnerableWeb</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Kreon:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg" href="{{ url_for('static', filename='image/logo.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/todos.css') }}">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem 1rem 0 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.2rem;
+            margin: 0 0 0.5rem 0;
+            font-family: 'Kreon', serif;
+        }
+
+        .header .subtitle {
+            color: #888;
+            font-size: 1rem;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .upload-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .upload-section h3 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-family: 'Kreon', serif;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #FF9800;
+        }
+
+        .file-info {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .submit-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #F57C00;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .alert.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border-color: #c62828;
+        }
+
+        .alert.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-color: #2e7d32;
+        }
+
+        .extracted-files {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .extracted-files h3 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-family: 'Kreon', serif;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .file-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+            color: #555;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+
+        .back-link {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+        }
+
+        .back-link:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <nav aria-label="Main navigation">
+        <div class="nav-container">
+            <a class="brand" href="/" aria-label="VulnerableWeb Home">
+                <img src="{{ url_for('static', filename='image/logo.svg') }}" height="40" width="40" alt="VulnerableWeb Logo">
+                <h4>VulnerableWeb</h4>
+            </a>
+            <div class="nav-links">
+                <span class="welcome">Welcome {{ session.get('username') }}</span>
+                {% if session.get('role') != 'admin' %}
+                    <a class="link" href="/todos">Todos</a>
+                    <a class="link" href="/notes">Notes</a>
+                {% else %}
+                    <a class="link" href="/admin/users">Users</a>
+                {% endif %}
+                <a class="link" href="/upload">Files</a>
+                <a class="link" href="/ssrf">Preview URL</a>
+                <a class="link" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Upload & Extract ZIP</h1>
+            <p class="subtitle">Upload a ZIP file and automatically extract its contents</p>
+        </div>
+
+        {% if error %}
+            <div class="alert error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if success %}
+            <div class="alert success">
+                {{ success }}
+            </div>
+        {% endif %}
+
+        <div class="upload-section">
+            <h3>Select ZIP File</h3>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Choose ZIP File:</label>
+                    <input type="file" id="file" name="file" accept=".zip" required>
+                    <p class="file-info">Upload a .zip file and it will be automatically extracted to the uploads folder.</p>
+                </div>
+
+                <button type="submit" class="submit-btn">Upload & Extract</button>
+            </form>
+        </div>
+
+        {% if extracted_files %}
+            <div class="extracted-files">
+                <h3>Extracted Files ({{ extracted_files|length }})</h3>
+                <ul class="file-list">
+                    {% for file in extracted_files %}
+                        <li>{{ file }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('main.upload_file') }}" class="back-link">← Back to Files</a>
+    </div>
+</body>
+</html>
