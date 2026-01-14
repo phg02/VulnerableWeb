@@ -415,6 +415,3 @@ def delete_file(filename):
 	except Exception as e:
 		return render_template('files.html', error=f'Error deleting file: {str(e)}', uploaded_files=get_uploaded_files())
 
-@main_bp.route('/uploads/<path:filename>')
-def serve_upload(filename):
-	return send_file(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
