@@ -7,7 +7,7 @@ def create_app(config_name=None):
     """Application factory"""
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'development')
-    
+    app.debug = True
     app = Flask(__name__)
     app.config.from_object(config.get(config_name, config['default']))
     app.config['SESSION_COOKIE_HTTPONLY'] = False
